@@ -1,0 +1,688 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>MyPuppy</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Inter:wght@400;500;600&display=swap">
+<style>
+body{margin:0}img{max-width:100%}[hidden]{display:none!important}
+/* Layout: one phone-width column, a quiet header with the puppy's name, cards only where a thing needs to stand apart, a bottom tab bar. */
+:root{
+  --bg:#F6F8F8; --surface:#FFFFFF; --ink:#152120; --muted:#5A6A68; --line:#E1E7E6;
+  --accent:#1C6B5E; --accent-ink:#FFFFFF; --accent-soft:#E4F1EE; --warn:#B0532C; --warn-soft:#F8EAE3;
+  --font-display:"Manrope",ui-sans-serif,system-ui,sans-serif;
+  --font-body:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0E1413; --surface:#161F1E; --ink:#E6EEEC; --muted:#98A8A5; --line:#263230;
+  --accent:#5BC2AC; --accent-ink:#0B1A17; --accent-soft:#18322D; --warn:#E28B64; --warn-soft:#3A2219; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E1413; --surface:#161F1E; --ink:#E6EEEC; --muted:#98A8A5; --line:#263230;
+  --accent:#5BC2AC; --accent-ink:#0B1A17; --accent-soft:#18322D; --warn:#E28B64; --warn-soft:#3A2219; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font:400 15px/1.55 var(--font-body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:520px;margin:0 auto;padding-block:20px 110px}
+h1,h2,h3{font-family:var(--font-display);margin:0;text-wrap:balance;letter-spacing:-.01em}
+h1{font-size:30px;font-weight:800;line-height:1.15}
+h2{font-size:20px;font-weight:700}
+h3{font-size:16px;font-weight:700}
+p{margin:0}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.stack{display:flex;flex-direction:column;gap:12px}
+.stack-lg{display:flex;flex-direction:column;gap:24px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px}
+.btn{font:600 15px var(--font-body);border-radius:10px;padding:12px 16px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn:focus-visible,.chip:focus-visible,.tab:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,.task input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn-primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn-warn{color:var(--warn);border-color:var(--warn)}
+.btn-ghost{background:transparent;border-color:transparent;color:var(--muted);padding:8px 4px}
+.btn-block{width:100%}
+label.f{display:flex;flex-direction:column;gap:6px;font-weight:500;font-size:14px}
+input[type=text],input[type=number],input[type=date],select,textarea{font:400 15px var(--font-body);padding:11px 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);width:100%}
+textarea{min-height:96px;resize:vertical}
+.chip{font:500 14px var(--font-body);padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--ink)}
+.steps{display:flex;gap:6px}
+.steps span{height:4px;flex:1;border-radius:2px;background:var(--line)}
+.steps span.on{background:var(--accent)}
+/* header */
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.daypill{font:700 13px var(--font-display);background:var(--accent-soft);color:var(--ink);border-radius:999px;padding:6px 12px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.bar{height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--accent)}
+/* coach message */
+.msg{display:flex;gap:10px;align-items:flex-start}
+.avatar{flex:none;width:34px;height:34px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font:800 14px var(--font-display)}
+.bubble{background:var(--surface);border:1px solid var(--line);border-radius:4px 16px 16px 16px;padding:12px 14px;min-width:0}
+.bubble .meta{font-size:12px;color:var(--muted);margin-bottom:4px}
+/* tasks */
+.task{display:grid;grid-template-columns:24px 1fr;gap:12px;padding:14px 0;border-top:1px solid var(--line)}
+.task:first-child{border-top:0;padding-top:0}
+.task input{width:20px;height:20px;margin:2px 0 0;accent-color:var(--accent)}
+.task .t{font-weight:600}
+.task.done .t{text-decoration:line-through;color:var(--muted)}
+.tag{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);margin-bottom:2px}
+/* trackers */
+.big{font:800 28px var(--font-display);font-variant-numeric:tabular-nums}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.stat{background:var(--bg);border-radius:10px;padding:10px}
+.stat .lbl{font-size:12px;color:var(--muted)}
+.week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;align-items:end;height:84px}
+.week .col{display:flex;flex-direction:column;justify-content:flex-end;gap:2px;height:100%;align-items:stretch}
+.week .col i{display:block;border-radius:3px;min-height:0}
+.week .g{background:var(--accent)}
+.week .w{background:var(--warn)}
+.week-l{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;font-size:11px;color:var(--muted);text-align:center;font-variant-numeric:tabular-nums}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--muted)}
+.legend b{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.stepper{display:flex;align-items:center;gap:12px}
+.stepper .btn{width:44px;height:44px;padding:0;font-size:20px}
+/* progress grid */
+.grid90{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:5px}
+.grid90 span{aspect-ratio:1;border-radius:4px;background:var(--line);max-width:100%}
+.grid90 span.full{background:var(--accent)}
+.grid90 span.part{background:var(--accent-soft);box-shadow:inset 0 0 0 1px var(--accent)}
+.grid90 span.today{box-shadow:inset 0 0 0 2px var(--ink)}
+.ms{display:grid;grid-template-columns:56px 1fr;gap:4px 12px;font-size:14px}
+.ms .d{font-variant-numeric:tabular-nums;color:var(--muted)}
+.ms .hit{color:var(--accent);font-weight:600}
+.opts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.note{background:var(--accent-soft);border-radius:12px;padding:12px 14px;font-size:14px}
+.warnnote{background:var(--warn-soft);border-radius:12px;padding:12px 14px;font-size:14px}
+ul.clean{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
+/* tabs */
+nav.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);
+  padding:8px max(16px,env(safe-area-inset-right,0px)) calc(8px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));z-index:5}
+nav.tabs .in{max-width:520px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+.tab{font:600 13px var(--font-body);background:transparent;border:0;color:var(--muted);padding:10px 4px;border-radius:10px;cursor:pointer}
+.tab[aria-current="page"]{color:var(--ink);background:var(--accent-soft)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 14px;border-radius:10px;font-size:14px;z-index:6}
+@media (prefers-reduced-motion:no-preference){.bar>i{transition:width .4s ease}}
+input[type=email]{font:400 15px var(--font-body);padding:11px 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);width:100%}
+input[type=file]{font:400 13px var(--font-body);max-width:100%;color:var(--muted)}
+.task input:disabled{opacity:.5}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.plans{display:flex;flex-direction:column;gap:8px}
+.plan{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--line);border-radius:10px}
+.plan.main{border-color:var(--accent);background:var(--accent-soft)}
+.plan .price{font:800 18px var(--font-display);font-variant-numeric:tabular-nums;white-space:nowrap}
+.sharecard{background:var(--accent);color:var(--accent-ink);border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:12px}
+.sc-top{display:flex;justify-content:space-between;gap:8px;font:700 13px var(--font-display)}
+.sharecard img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:10px}
+.sc-name{font:800 34px/1.1 var(--font-display);overflow-wrap:anywhere}
+.sc-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;border-top:1px solid color-mix(in srgb,var(--accent-ink) 30%,transparent);padding-top:12px}
+.sc-stats b{display:block;font:800 22px var(--font-display);font-variant-numeric:tabular-nums}
+.sc-stats span{font-size:12px}
+.cert{border:2px solid var(--accent);border-radius:14px;padding:24px 16px;text-align:center;background:var(--surface);display:flex;flex-direction:column;gap:8px;align-items:center}
+.cert h2{font-size:30px;font-weight:800;overflow-wrap:anywhere}
+.cert-ph{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;width:100%;margin-top:8px}
+.cert-ph figure{margin:0;display:flex;flex-direction:column;gap:4px}
+.cert-ph img,.ph-empty{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px}
+.ph-empty{border:1px dashed var(--line);display:grid;place-items:center;color:var(--muted);font-size:12px;padding:8px}
+.cert-ph figcaption{font-size:12px;color:var(--muted)}
+.thumb{width:72px;height:72px;object-fit:cover;border-radius:10px;flex:none}
+details.legal{border-top:1px solid var(--line);padding:10px 0}
+details.legal:first-of-type{border-top:0}
+details.legal summary{cursor:pointer;font-weight:600}
+details.legal p{margin-top:8px;font-size:13px;color:var(--muted)}
+
+input[type=password]{font:400 15px var(--font-body);padding:11px 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);width:100%}
+.wrap a.plan{text-decoration:none;color:inherit}
+a.plan:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap a{color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<nav class="tabs" id="tabs" hidden><div class="in">
+  <button class="tab" data-tab="today">Today</button>
+  <button class="tab" data-tab="track">Track</button>
+  <button class="tab" data-tab="progress">Progress</button>
+  <button class="tab" data-tab="help">Help</button>
+</div></nav>
+<div class="toast" id="toast" hidden></div>
+<script src="../config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+(function(){
+const KEY='mypuppy-v2',PKEY='mypuppy-photos-v2',FREE_DAYS=3;
+let mem=null,pmem={};
+function load(){try{const r=localStorage.getItem(KEY);if(r)return JSON.parse(r)}catch(e){}return mem}
+function persist(){S.rev=(S.rev||0)+1;mem=S;try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}pushCloud()}
+function loadPhotos(){try{const r=localStorage.getItem(PKEY);if(r)return JSON.parse(r)}catch(e){}return pmem}
+function savePhotos(){pmem=PH;pushCloud();try{localStorage.setItem(PKEY,JSON.stringify(PH));return true}catch(e){return false}}
+const blank=()=>({profile:null,cur:1,done:{},doneOn:{},last:null,away:null,unlocked:false,lead:'',potty:[],bites:{},nights:{},crate:{},checkins:{},previewDay:null});
+let S=Object.assign(blank(),load()||{});
+let PH=loadPhotos()||{};
+/* ---------- accounts and cloud save (Supabase). With no settings in config.js the app runs on this device only. ---------- */
+const CFG=window.MYPUPPY_CONFIG||{};
+const cloud=(CFG.supabaseUrl&&CFG.supabaseAnonKey&&window.supabase)?window.supabase.createClient(CFG.supabaseUrl,CFG.supabaseAnonKey):null;
+let user=null,pushT=null,authMode=null,authNote='';
+function pushCloud(){
+  if(!cloud||!user||!S.profile)return;
+  clearTimeout(pushT);pushT=setTimeout(flushCloud,700);
+}
+function flushCloud(){
+  clearTimeout(pushT);pushT=null;
+  if(!cloud||!user||!S.profile)return;
+  const state=Object.assign({},S);delete state.unlocked;delete state.previewDay;
+  cloud.from('profiles').update({state,photos:PH,puppy_name:S.profile.name,cur_day:S.cur,last_active:S.last,updated_at:new Date().toISOString()}).eq('id',user.id).then(r=>{if(r&&r.error)console.error(r.error)},e=>console.error(e));
+}
+async function pullCloud(){
+  if(!cloud||!user)return;
+  try{
+    const {data,error}=await cloud.from('profiles').select('state,photos,unlocked').eq('id',user.id).single();
+    if(error||!data)return;
+    /* take the saved copy unless this device holds newer, unsent changes */
+    if(data.state&&data.state.profile&&!(S.profile&&(S.rev||0)>(data.state.rev||0))){S=Object.assign(blank(),data.state);PH=data.photos||{};pmem=PH;try{localStorage.setItem(PKEY,JSON.stringify(PH))}catch(e){}}
+    delete S.pendingSignup;
+    S.unlocked=!!data.unlocked;
+    persist();
+  }catch(e){console.error(e)}
+}
+async function refreshAccess(quiet){
+  if(!cloud||!user)return;
+  try{await cloud.rpc('claim_purchase')}catch(e){}
+  const was=S.unlocked;
+  try{const {data}=await cloud.from('profiles').select('state,photos,unlocked').eq('id',user.id).single();if(data){S.unlocked=!!data.unlocked;persist()}}catch(e){}
+  render();
+  if(!quiet||(!was&&S.unlocked))toast(S.unlocked?'Full plan unlocked':'No payment found yet for this email. It can take a minute.');
+}
+const validEmail=v=>/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v);
+const val=id=>{const el=document.getElementById(id);return el?el.value.trim():''};
+let tab='today', ob={step:0,data:{concerns:[]},photo:null}, confirmReset=false;
+
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const todayISO=()=>iso(new Date());
+const addDays=(s,n)=>{const d=new Date(s+'T00:00:00');d.setDate(d.getDate()+n);return iso(d)};
+const diff=(a,b)=>Math.round((new Date(b+'T00:00:00')-new Date(a+'T00:00:00'))/864e5);
+const toast=t=>{const el=$('#toast');el.textContent=t;el.hidden=false;clearTimeout(toast._t);toast._t=setTimeout(()=>el.hidden=true,2400)};
+
+/* ---------- content ---------- */
+const WEEKS=[
+ {t:'Settle in',goal:'Help {n} feel safe and learn the basic routine.',tasks:[
+  ['Name game','Say {n}\'s name once in a happy voice. When {n} looks at you, give a treat. Repeat 10 times.'],
+  ['Potty schedule','Take {n} to the same spot after waking, eating and playing, and about every {h} while awake. Praise and treat right after {n} goes.'],
+  ['Crate as a happy place','Toss treats into the open crate. Let {n} walk in and out freely. Keep the door open for now.'],
+  ['Gentle handling','Touch ears, paws and mouth for one second each, then treat. Keep it short and happy.'],
+  ['Two calm naps','Give {n} two naps today in a quiet spot. Young puppies sleep most of the day, and tired puppies bite more.'],
+  ['Chew station','Put out 2 or 3 safe chew toys. When {n} mouths you or furniture, offer a toy instead.']]},
+ {t:'Potty and crate routine',goal:'Build a predictable day so accidents and night crying drop.',tasks:[
+  ['Log every potty trip','Use the Track tab for each trip today. Patterns show up within a few days.'],
+  ['Door closed, you nearby','Close the crate door for 1 to 2 minutes while you sit next to it. Open it before {n} fusses.'],
+  ['Teeth on skin, play pauses','When teeth touch skin, stop play for 10 seconds and offer a toy. Then calmly start again.'],
+  ['Meal in the crate','Feed one meal inside the crate with the door open.'],
+  ['Reward calm','When {n} lies down calmly without being asked, quietly drop a treat between the paws.'],
+  ['Night plan','Last potty trip right before bed, crate near your bed, and boring night trips: no play, little talking.']]},
+ {t:'First skills',goal:'Teach {n} that paying attention to you pays off.',tasks:[
+  ['Sit','Hold a treat at {n}\'s nose and move it slowly up and back. Say "yes" the moment the bottom touches the floor. 5 reps, 3 times today.'],
+  ['Hand target','Hold your flat palm near {n}\'s nose. Treat when the nose touches it. 10 reps.'],
+  ['A new sound','Play a recorded sound (vacuum, doorbell) quietly while {n} eats. Only make it louder on later days if {n} stays relaxed.'],
+  ['A new surface','Let {n} walk on something new: a mat, tiles, grass or a towel. Treat for exploring.'],
+  ['Collar time','Put the collar on during meals and play for a few minutes.'],
+  ['Come, indoors','Say {n}\'s name, take two steps back, and treat when {n} reaches you.']]},
+ {t:'Short alone time',goal:'Teach {n} that being alone for a moment is normal.',tasks:[
+  ['Out of sight, 30 seconds','Step out of the room for 30 seconds while {n} has a chew. Come back calmly, without a big greeting.'],
+  ['Leash indoors','Clip the leash on indoors and let it trail for 5 minutes while you watch.'],
+  ['Boring departures','Pick up your keys and sit back down, 5 times. Leaving signals stop meaning much.'],
+  ['Meet a calm person','Invite one calm visitor. They toss a treat and let {n} come to them.'],
+  ['Down','From a sit, lower a treat slowly to the floor between the paws. Say "yes" when the elbows touch down.'],
+  ['Teething relief','Offer a chilled chew toy or a damp knotted cloth from the fridge. Stay close while {n} chews it.']]},
+ {t:'Leash and focus',goal:'Start loose-leash habits before {n} learns to pull.',tasks:[
+  ['Follow me','Walk a few steps indoors with the leash on. Treat at your side whenever the leash is loose.'],
+  ['Leave it, level 1','Close a treat in your fist. When {n} stops sniffing at it, treat from your other hand.'],
+  ['Sit before good things','Ask for a sit before meals, before the door opens, and before play.'],
+  ['Brushing practice','Brush {n} for 30 seconds and treat throughout.'],
+  ['Name with the TV on','Say {n}\'s name in a noisier room. Treat for a look.'],
+  ['Alone, 2 minutes','Leave the room for 2 minutes while {n} has a chew.']]},
+ {t:'Come and calm greetings',goal:'Make coming to you the best game in the house.',tasks:[
+  ['Recall ping-pong','Two people take turns calling {n} across the room. Big reward on arrival.'],
+  ['Four paws on the floor','Greet {n} only when all four paws are down. Turn away calmly when {n} jumps.'],
+  ['Follow the hand','Move your target hand and have {n} follow it a few steps.'],
+  ['Watch me','Hold a treat near your eyes. Treat when {n} looks at your face.'],
+  ['Calm doorbell','Ring the bell, then toss a treat onto a mat away from the door. Repeat 5 times.'],
+  ['Settle after play','End each play session with 5 minutes of a calm chew.']]},
+ {t:'Stay and handling',goal:'Build patience and make vet visits easier.',tasks:[
+  ['Stay, 1 second','Ask for a sit, show your flat hand, wait 1 second, treat. Build up to 5 seconds.'],
+  ['Vet check practice','Look in the ears, lift the lips and hold a paw for 3 seconds. Treat after each.'],
+  ['Nail touch','Touch the clipper to one nail and treat. Only clip if {n} is relaxed.'],
+  ['Leave it, level 2','Put a treat on the floor under your hand. Treat from your other hand when {n} backs off.'],
+  ['Alone, 5 minutes','Leave with a chew in place. Come back calmly.'],
+  ['Come away from a toy','Call {n} away from a toy. Pay well, then give the toy back.']]},
+ {t:'Settle on a mat',goal:'Give {n} a place to relax anywhere.',tasks:[
+  ['Mat game','Treat every time {n} steps onto a mat. Later, treat only for lying down on it.'],
+  ['Trade, don\'t chase','When {n} grabs something forbidden, trade it for a treat instead of chasing.'],
+  ['Drop it','While {n} holds a toy, hold a treat at {his} nose. Say "drop" as it falls, then give the toy back.'],
+  ['Sniff walk','10 minutes of slow sniffing outside, once your vet says outdoor walks are fine.'],
+  ['Stay with one step','Take one step back during a stay, come back, treat.'],
+  ['Calm dinner','10 minutes on the mat with a chew while you eat.']]},
+ {t:'Patience',goal:'Teach {n} to wait for good things instead of grabbing them.',tasks:[
+  ['Wait at the door','Open the door a little. Close it if {n} rushes. Open it fully when {n} waits, then release.'],
+  ['Bowl wait','Lower the bowl. Lift it back up if {n} dives. Put it down when {n} waits one second.'],
+  ['Leave it on leash','Practise leave it with a treat on the floor, with the leash on.'],
+  ['Tug with rules','Play tug, ask for "drop", then start tug again as the reward.'],
+  ['Alone, 10 minutes','Leave with a chew. Keep the return calm.'],
+  ['Down-stay','Hold a down for 5 seconds before the treat.']]},
+ {t:'Outside and distractions',goal:'Take {n}\'s skills into the real world.',tasks:[
+  ['Loose leash outside','Stop when the leash goes tight. Walk on when it loosens.'],
+  ['Long-line recall','In a safe open space, call {n} on a long line. Party when {n} arrives.'],
+  ['Watch me outside','Ask for eye contact with a little going on around you.'],
+  ['Watch the world','Sit somewhere new, like a bench, and treat {n} for calmly watching.'],
+  ['Calm dog friend','A short, calm meet with a known, vaccinated adult dog, once your vet agrees.'],
+  ['Rest day','Only two short sessions today. Rest helps learning stick.']]},
+ {t:'Practice everywhere',goal:'Make each skill work in more places.',tasks:[
+  ['Sit in 3 rooms','Ask for a sit in three different rooms.'],
+  ['Come with distractions','Call {n} while something interesting is happening.'],
+  ['Stay, 3 steps','Take three steps back during a stay.'],
+  ['Alone, 15 minutes','Build up only if {n} stayed calm last time.'],
+  ['Mat in a new room','Practise the settle in a room {n} rarely uses.'],
+  ['Leave a dropped treat','Drop a treat and ask for leave it.']]},
+ {t:'Everyday manners',goal:'Make {n} easy to live with day to day.',tasks:[
+  ['Settle outdoors','10 minutes on the mat on a porch or in a quiet outdoor spot.'],
+  ['Visitor on the mat','Ask {n} to wait on the mat while a visitor comes in.'],
+  ['Pass a distraction','Walk past something interesting on a loose leash.'],
+  ['One nail trim','Trim one nail, then treat.'],
+  ['Come during play','Call {n} out of play, reward, and send {him} back to play.'],
+  ['Family handling','Another family member practises gentle handling.']]},
+ {t:'Graduation',goal:'Show off what {n} learned and plan what comes next.',tasks:[
+  ['Show-off session','Run through name, sit, down, come and leave it.'],
+  ['Longest alone time','Your longest calm alone time yet.'],
+  ['15-minute walk','A loose-leash walk of 15 minutes.'],
+  ['Pick the next goal','Choose one skill to keep working on after day 90.'],
+  ['Day 90 photo','Take a photo of {n} today to compare with day 1.'],
+  ['Keep it going','Plan 5 minutes of training a day from now on.']]}
+];
+const CONCERNS={
+ biting:['Biting','Teeth on skin means play pauses for 10 seconds, then offer a chew. Being consistent matters more than being loud.'],
+ potty:['Potty accidents','Set a timer for about every {h} while {n} is awake, and go out before an accident can happen.'],
+ crying:['Crying at night','Crate next to your bed. Let {n} smell your hand. Keep night trips quiet and boring.'],
+ chewing:['Chewing things','Rotate toys: put two away and bring out two others. New-to-them toys keep {n} interested.'],
+ jumping:['Jumping up','Ask everyone to greet {n} only when all four paws are on the floor.'],
+ pulling:['Pulling on the leash','Stand still when the leash goes tight. Move when it loosens.'],
+ shy:['Shy or nervous','Let {n} approach new things in {his} own time. Treat curiosity and never pull {n} toward something scary.'],
+ energy:['Very energetic','Five minutes of scatter feeding: toss kibble on a towel or grass. Sniffing calms and tires puppies.']
+};
+const STORY={
+ breeder:'{n} just left {his} litter, so some crying at night is normal at first. Keep the crate close to you.',
+ shelter:'{n} came from a shelter, so give extra quiet time this week. Trust grows with a predictable routine.',
+ rescue:'{n} is a rescue, so go at {his} pace. Calm, predictable days help more than lots of new things.',
+ family:'{n} came from family or friends. Ask about {his} food and sleep routine, and keep both the same this week.',
+ found:'Since you found {n}, book a vet check soon, including a microchip scan.',
+ gift:'{n} arrived as a gift. Agree as a household who does which potty trips, so the routine stays the same.'
+};
+const WEEK_MSG=[
+ 'Good morning. Today {n} gets a few small tasks and lots of naps. Short and calm wins.',
+ 'Day {d}. Keep sessions to 3 to 5 minutes. Stop while {n} still wants more.',
+ 'Consistency beats intensity. Same potty spot, same words, same routine for {n} today.',
+ 'Day {d} with {n}. One task done well counts more than three rushed ones.',
+ 'Every calm moment you reward today makes calm more likely tomorrow. Watch for them.',
+ 'Day {d}. If {n} struggles with a task, make it easier for {him} rather than repeating it louder.',
+ 'End of the week is close. Look at the Track tab and see what changed for {n}.'
+];
+
+/* ---------- helpers ---------- */
+const P=()=>S.profile;
+const PRON={female:['she','her','her','herself'],male:['he','him','his','himself']};
+const pron=()=>PRON[(P()||{}).gender]||['they','them','their','themselves'];
+const sub=s=>{const p=P()||{},g=pron();return s.replace(/\{n\}/g,esc(p.name||'your puppy')).replace(/\{h\}/g,potty().label).replace(/\{he\}/g,g[0]).replace(/\{him\}/g,g[1]).replace(/\{his\}/g,g[2]).replace(/\{himself\}/g,g[3])};
+const day=()=>Math.min(90,S.previewDay||S.cur);
+const isPreview=()=>!!S.previewDay&&S.previewDay!==S.cur;
+const weekOf=d=>Math.min(13,Math.ceil(d/7));
+function ageWeeks(d=day()){return (+P().age||10)+Math.floor((d-1)/7)}
+function potty(){const w=P()?ageWeeks():10;const h=Math.max(1,Math.min(4,Math.floor(w/4.3)+1));return {h,label:h===1?'1 hour':h+' hours'}}
+function tasksFor(d){
+  const w=WEEKS[weekOf(d)-1],i=(d-1)%7,list=[];
+  for(let k=0;k<3;k++){const t=w.tasks[(i+k*2)%6];list.push({id:'w'+(i+k*2)%6,tag:'Week '+weekOf(d),t:t[0],how:t[1]})}
+  const foc=focusList(d);
+  if(foc.length){const c=foc[(d-1)%foc.length];list.push({id:'f-'+c,tag:'Your focus',t:CONCERNS[c][0],how:CONCERNS[c][1]})}
+  return list;
+}
+function focusList(d){
+  const set=[...(P().concerns||[])];
+  const prev=S.checkins[weekOf(d)-1];
+  if(prev&&prev.focus&&!set.includes(prev.focus))set.unshift(prev.focus);
+  return set;
+}
+const dayDone=d=>{const t=tasksFor(d),done=S.done[d]||{};const n=t.filter(x=>done[x.id]).length;return {n,total:t.length}};
+const complete=d=>{const r=dayDone(d);return r.n===r.total};
+const doneCount=()=>S.cur-1+(complete(S.cur)?1:0);
+const locked=()=>!S.unlocked&&S.cur===FREE_DAYS&&complete(FREE_DAYS);
+/* The plan moves forward only when a day is completed, and at most one day per calendar day. */
+function advance(){const c=S.cur;if(P()&&c<90&&complete(c)&&S.doneOn[c]&&S.doneOn[c]<todayISO()&&(c<FREE_DAYS||S.unlocked)){S.cur=c+1;persist()}}
+function touch(){S.last=todayISO()}
+function checkAway(){if(!P()||!S.last)return;const g=diff(S.last,todayISO());if(g>=2)S.away={days:g,on:todayISO()};else if(S.away&&S.away.on!==todayISO())S.away=null}
+function shiftBack(n){Object.keys(S.doneOn).forEach(k=>S.doneOn[k]=addDays(S.doneOn[k],-n));if(S.last)S.last=addDays(S.last,-n);if(P()&&P().start)P().start=addDays(P().start,-n)}
+function coach(d){
+  const p=P();
+  if(d===1)return 'Welcome'+(p.owner?', '+esc(p.owner):'')+'. Today is Day 1 with {n}. Keep things calm and simple: a few small tasks and lots of naps.'+(STORY[p.how]?' '+STORY[p.how]:'');
+  if(d===7)return 'One week done. {n} has had seven days of routine. Do the weekly check-in on the Progress tab so next week fits {him}.';
+  if(d===14)return 'Two weeks in. Most owners see the potty pattern by now. Check the Track tab: when do {n}\'s accidents happen?';
+  if(d===30)return 'Day 30. A third of the way there. {n} knows your routine now, and {his} next skills build on it.';
+  if(d===45)return 'Halfway. 45 days of showing up for {n}. Keep the sessions short and keep going.';
+  if(d===60)return 'Day 60. Two months of work. This month we take {n}\'s skills outside.';
+  if(d===75)return 'Day 75. Two weeks left. This is where habits become just how {n} behaves.';
+  if(d>=76&&d<=89){const left=90-d,dd=left===1?'1 day':left+' days';const v=['{n} is reaching the final stretch. '+dd+' to go. Let\'s go.','Only '+dd+' left. {n} is close to graduating. Keep the routine going.','Final stretch: '+dd+'. Stay consistent with {n}, especially on busy days.'];return v[d%3]}
+  if(d===90)return 'Day 90. {n} made it, and so did you. Run the show-off session, then add {his} Day 90 photo on the Progress tab.';
+  return WEEK_MSG[(d-1)%7].replace(/\{d\}/g,d);
+}
+function coachNow(){
+  if(!isPreview()&&S.away&&S.away.on===todayISO())return '{n} missed you. It has been '+S.away.days+' days since your last session. There is nothing to catch up on. Let\'s pick up where you left off, at Day '+S.cur+'.';
+  return coach(day());
+}
+function streak(){
+  const ds=Object.keys(S.doneOn).map(Number).sort((a,b)=>b-a);if(!ds.length)return 0;
+  let prev=S.doneOn[ds[0]];if(diff(prev,todayISO())>1)return 0;
+  let s=1;for(let i=1;i<ds.length;i++){const c=S.doneOn[ds[i]];if(diff(c,prev)<=1){s++;prev=c}else break}
+  return s;
+}
+const last7=()=>{const out=[];for(let k=6;k>=0;k--){const d=day()-k;out.push(d>=1?d:null)}return out};
+const checkinDue=()=>{const need=Math.floor(doneCount()/7);return need>=1&&need<=13&&!S.checkins[need]?need:0};
+function readPhoto(file,cb){
+  if(!file||!/^image\//.test(file.type)){toast('Choose an image file');return}
+  const r=new FileReader();
+  r.onload=()=>{const im=new Image();
+    im.onload=()=>{const s=Math.min(1,640/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);c.getContext('2d').drawImage(im,0,0,c.width,c.height);cb(c.toDataURL('image/jpeg',.82))};
+    im.onerror=()=>toast('That image could not be read');im.src=r.result};
+  r.readAsDataURL(file);
+}
+
+/* ---------- onboarding ---------- */
+const obSteps=()=>cloud&&!user?6:5;
+function sample(){ob.data={owner:'Sara',name:'Luna',breed:'Golden Retriever',gender:'female',size:'large',age:10,concerns:['biting','potty','crying'],how:'breeder',story:'We drove three hours to pick Luna up. She slept on my lap the whole way home and cried the first night.'};ob.photo=null;finishOb()}
+function finishOb(pending){
+  const d=ob.data;S=blank();if(pending)S.pendingSignup=true;
+  S.profile={owner:(d.owner||'').trim(),name:(d.name||'').trim()||'Puppy',breed:(d.breed||'').trim(),size:d.size||'medium',gender:d.gender||'',age:+d.age||10,concerns:d.concerns||[],how:d.how||'other',story:(d.story||'').trim(),start:todayISO()};
+  S.last=todayISO();PH={};if(ob.photo)PH[1]=ob.photo;savePhotos();persist();tab='today';render();
+}
+function ageNote(d){
+  const a=+d.age||10,n=esc(d.name||'Your puppy');
+  if(a<8)return `<div class="warnnote">Puppies under 8 weeks usually still need their mother and litter. Check with your vet about ${n}'s care before starting training.</div>`;
+  if(a>16)return `<div class="note">MyPuppy is built for puppies aged 8 to 16 weeks. ${n} is older, so some early tasks may feel easy. Do them anyway for the first days: they set up the routine in a new home.</div>`;
+  return '';
+}
+function renderAuth(){
+  $('#tabs').hidden=true;
+  if(authMode==='newpass'){$('#app').innerHTML=`<div class="stack-lg"><div class="stack"><p class="eyebrow">MyPuppy</p><h1>Set a new password</h1></div>
+    <div class="stack"><label class="f">New password <span class="muted small">At least 8 characters</span><input id="a-pass" type="password" autocomplete="new-password"></label>
+    <button class="btn btn-primary btn-block" id="setpass">Save password</button></div></div>`;return}
+  $('#app').innerHTML=`<div class="stack-lg"><div class="stack"><p class="eyebrow">MyPuppy</p><h1>Welcome back</h1>${authNote?`<div class="note">${esc(authNote)}</div>`:''}</div>
+    <div class="stack"><label class="f">Email<input id="a-email" type="email" autocomplete="email"></label>
+    <label class="f">Password<input id="a-pass" type="password" autocomplete="current-password"></label>
+    <button class="btn btn-primary btn-block" id="signin">Sign in</button>
+    <div class="row" style="justify-content:space-between"><button class="btn btn-ghost" id="forgot">Forgot password</button>${P()?'':'<button class="btn btn-ghost" id="back-welcome">Back</button>'}</div></div></div>`;
+}
+function renderOb(){
+  $('#tabs').hidden=true;
+  if(cloud&&(authMode==='newpass'||(!user&&(authMode==='signin'||P())))){renderAuth();return}
+  const d=ob.data,st=ob.step,nm=esc(d.name||'your puppy');
+  const dots='<div class="steps">'+Array.from({length:obSteps()},(_,i)=>'<span class="'+(i<=st?'on':'')+'"></span>').join('')+'</div>';
+  let body='';
+  if(st===0)body=`<div class="stack-lg">
+    <div class="stack"><p class="eyebrow">MyPuppy</p><h1>The first 90 days with your puppy, one day at a time.</h1>
+    <p class="muted">A few short tasks a day, built for your puppy's age and your home. Track potty trips, biting and nights, and watch the progress add up.</p>
+    <p class="small muted">The first 3 days are free.</p></div>
+    <div class="stack"><button class="btn btn-primary btn-block" data-go="1">Set up my puppy</button>${cloud?'<button class="btn btn-block" id="go-signin">I already have an account</button>':''}</div></div>`;
+  if(st===1)body=`<div class="stack"><h2>Who's joining the family?</h2>
+    <label class="f">Your first name <span class="muted small">Optional</span><input id="f-owner" type="text" value="${esc(d.owner)}" autocomplete="given-name"></label>
+    <label class="f">Puppy's name<input id="f-name" type="text" value="${esc(d.name)}" placeholder="Luna"></label>
+    <label class="f">Breed or type<input id="f-breed" type="text" value="${esc(d.breed)}" placeholder="Golden Retriever, mixed breed, not sure"></label>
+    <label class="f">Gender<select id="f-gender"><option value="" ${!d.gender?'selected':''} disabled>Choose</option><option value="female" ${d.gender==='female'?'selected':''}>Female</option><option value="male" ${d.gender==='male'?'selected':''}>Male</option></select></label>
+    <label class="f">Expected adult size<select id="f-size">${['toy','small','medium','large','giant'].map(s=>`<option value="${s}" ${(d.size||'medium')===s?'selected':''}>${s[0].toUpperCase()+s.slice(1)}</option>`).join('')}</select></label>
+    <label class="f">Age today, in weeks<input id="f-age" type="number" min="4" max="52" value="${esc(d.age||10)}"></label></div>`;
+  if(st===2)body=`<div class="stack"><h2>What's hardest right now?</h2><p class="muted">Pick any that apply. ${esc(d.name||'Your puppy')} gets an extra focus task for these.</p>
+    <div class="row">${Object.keys(CONCERNS).map(k=>`<button class="chip" data-c="${k}" aria-pressed="${(d.concerns||[]).includes(k)}">${CONCERNS[k][0]}</button>`).join('')}</div></div>`;
+  if(st===3)body=`<div class="stack"><h2>How did ${nm} come home?</h2>
+    <label class="f">Where ${nm} came from<select id="f-how">${[['breeder','From a breeder'],['shelter','Adopted from a shelter'],['rescue','From a rescue group'],['family','From family or friends'],['found','Found as a stray'],['gift','A gift'],['other','Other']].map(([v,l])=>`<option value="${v}" ${d.how===v?'selected':''}>${l}</option>`).join('')}</select></label>
+    <label class="f">Tell us the story <span class="muted small">A few lines on how you found, bought or adopted ${nm}</span><textarea id="f-story" placeholder="The day you met, the ride home, the first night...">${esc(d.story)}</textarea></label></div>`;
+  if(st===4)body=`<div class="stack"><h2>Add a Day 1 photo</h2>
+    <p class="muted">Optional. On Day 90 it goes next to ${nm}'s graduation photo.</p>
+    <div class="row">${ob.photo?`<img class="thumb" src="${ob.photo}" alt="Day 1 photo">`:''}<input id="f-photo" type="file" accept="image/*" aria-label="Day 1 photo"></div>
+    ${ageNote(d)}
+    <div class="note">Day 1 starts today. Each new day opens after you finish the one before, so a missed day never skips a lesson.</div></div>`;
+  if(st===5)body=`<div class="stack"><h2>Save ${nm}'s plan</h2>
+    <p class="muted">Create your free account so ${nm}'s progress is saved and works on any device. Daily reminders go to this email.</p>
+    <label class="f">Email<input id="a-email" type="email" autocomplete="email" value="${esc(d.email||'')}"></label>
+    <label class="f">Password <span class="muted small">At least 8 characters</span><input id="a-pass" type="password" autocomplete="new-password"></label>
+    <p class="small muted">By creating an account you agree to the <a href="../#terms">terms, refund policy and privacy policy</a>.</p></div>`;
+  const nav=st>0?`<div class="row" style="justify-content:space-between;margin-top:24px"><button class="btn btn-ghost" data-go="${st-1}">Back</button>
+    <button class="btn btn-primary" ${st===obSteps()-1?(cloud&&!user?'id="signup"':'id="finish"'):`data-go="${st+1}"`}>${st===obSteps()-1?(cloud&&!user?'Create account and start':'Start Day 1'):'Next'}</button></div>`:'';
+  $('#app').innerHTML=`<div class="stack-lg">${st>0?dots:''}${body}${nav}</div>`;
+}
+function grabOb(){const g=id=>{const el=document.getElementById(id);return el?el.value:undefined};const em=g('a-email');if(em!==undefined)ob.data.email=em;
+  ['owner','name','breed','gender','size','age','how','story'].forEach(k=>{const v=g('f-'+k);if(v!==undefined)ob.data[k]=v})}
+
+/* ---------- app views ---------- */
+function header(){const p=P(),d=day();return `<div class="stack">
+  <div class="top"><div class="stack" style="gap:4px;min-width:0"><p class="eyebrow">Week ${weekOf(d)} · ${esc(WEEKS[weekOf(d)-1].t)}</p><h1>${esc(p.name)}</h1></div>
+  <span class="daypill">Day ${d} of 90</span></div>
+  <div class="bar" aria-label="${d} of 90 days"><i style="width:${(d/90*100).toFixed(1)}%"></i></div>
+  ${isPreview()?`<p class="small muted">Previewing Day ${d}. ${esc(p.name)} is on Day ${S.cur}. <button class="btn-ghost btn small" id="endpreview" style="padding:0;color:var(--accent)">Back to Day ${S.cur}</button></p>`:''}</div>`}
+let showPlans=false;
+function buyLink(u){const e=user&&user.email?encodeURIComponent(user.email):'';return u+(u.includes('?')?'&':'?')+'wanted=true'+(e?'&email='+e:'')}
+function paywall(){
+  const n=esc(P().name),early=!complete(S.cur),g=CFG.gumroad||{};
+  const plan=(k,name,line,price,main)=>g[k]?`<a class="plan ${main?'main':''}" href="${esc(buyLink(g[k]))}" target="_blank" rel="noopener"><span><b>${name}</b><br><span class="small muted">${line}</span></span><span class="price">${price}</span></a>`:'';
+  const plans=plan('pass','90-Day Pass','The full plan, paid once','$29',true)+plan('monthly','Monthly','Cancel any time','$9.99')+plan('lifetime','Lifetime','Includes future modules','$59');
+  let buy;
+  if(plans)buy=`<div class="plans">${plans}</div>
+    <p class="small muted">Checkout opens on Gumroad. Use the same email as your MyPuppy account${user?' ('+esc(user.email)+')':''}. 7-day refund.</p>
+    <button class="btn btn-block" id="refresh-access">I've paid. Unlock my plan</button>`;
+  else if(cloud)buy=`<div class="note">Paid plans open soon. We will email ${user?esc(user.email):'you'} when they do. ${n}'s progress is saved.</div>`;
+  else buy=`<button class="btn btn-primary btn-block" id="unlock">Unlock for testing</button>`;
+  return `<div class="card stack" id="paywall"><p class="eyebrow">${early?'Last free day':'Free preview complete'}</p><h2>Keep going with ${n}</h2>
+  <p class="small">${early?'Today is the last free day. Upgrade now and Day 4 opens tomorrow without a break.':'You finished the 3 free days.'} The full plan has 87 more days of tasks, coach messages, trackers and weekly check-ins, ending with ${n}'s graduation certificate.</p>
+  ${buy}</div>`}
+function viewToday(){
+  const d=day(),pv=isPreview(),t=tasksFor(d),done=S.done[d]||{},w=WEEKS[weekOf(d)-1],pt=potty(),due=checkinDue(),n=esc(P().name);
+  let after='';
+  if(!pv&&complete(d)){
+    if(locked())after=paywall();
+    else if(d>=90)after=`<div class="note row" style="justify-content:space-between"><span>${n} graduated. The certificate is ready.</span><button class="btn" data-tabgo="progress">See it</button></div>`;
+    else if(!S.unlocked&&d===FREE_DAYS-1)after=`<div class="warnnote">Day ${d} is done. Day ${d+1} opens tomorrow, and it is your last free day. Upgrade on Day ${d+1} to keep ${n}'s plan going.</div>`;
+    else after=`<div class="note">Day ${d} is done. Day ${d+1} opens tomorrow.</div>`;
+  }
+  let trial='';
+  if(!pv&&!S.unlocked&&d===FREE_DAYS&&!complete(d))trial=showPlans?paywall():`<div class="warnnote row" style="justify-content:space-between"><span style="flex:1;min-width:180px">Today is ${n}'s last free day. Upgrade now so the plan continues tomorrow without a break.</span><button class="btn" id="seeplans">See plans</button></div>`;
+  return `<div class="stack-lg">${header()}
+  <div class="msg"><div class="avatar" aria-hidden="true">C</div><div class="bubble"><p class="meta">Your coach · Day ${d}</p><p>${sub(coachNow())}</p></div></div>
+  ${trial}${after}
+  ${due&&!pv?`<div class="note row" style="justify-content:space-between"><span>Week ${due} check-in is ready.</span><button class="btn" data-tabgo="progress">Do it now</button></div>`:''}
+  <div class="stack"><div class="row" style="justify-content:space-between"><h2>${pv?'Day '+d+' tasks':'Today\'s tasks'}</h2><span class="muted small">${t.filter(x=>done[x.id]).length} of ${t.length} done</span></div>
+  <p class="muted small">This week: ${sub(w.goal)}</p>
+  <div class="card">${t.map(x=>`<label class="task ${done[x.id]?'done':''}"><input type="checkbox" data-task="${x.id}" ${done[x.id]?'checked':''} ${pv?'disabled':''}><span><span class="tag">${x.tag}</span><span class="t" style="display:block">${esc(x.t)}</span><span class="muted small" style="display:block">${sub(x.how)}</span></span></label>`).join('')}</div>
+  ${!S.unlocked&&!pv?`<p class="small muted">Free preview: Day ${Math.min(d,FREE_DAYS)} of ${FREE_DAYS}. Finish all of today's tasks to open the next day.</p>`:(!pv&&!complete(d)?`<p class="small muted">Finish all of today's tasks to open Day ${Math.min(90,d+1)} tomorrow.</p>`:'')}</div>
+  <div class="card stack"><h3>Potty timing for ${n}</h3><p class="small">At about ${ageWeeks()} weeks old, plan a trip roughly every ${pt.label} while awake, plus after waking, eating and play. Every puppy differs, so follow what the tracker shows.</p></div>
+  </div>`;
+}
+function bars(vals,max,cls){return vals.map(v=>`<i class="${cls}" style="height:${max?Math.round(v/max*100):0}%"></i>`).join('')}
+function viewTrack(){
+  const d=day(),days=last7();
+  const pd=x=>S.potty.filter(e=>e.d===x);
+  const today=pd(d),wins=today.filter(e=>e.k==='win').length,acc=today.length-wins;
+  const hours={};S.potty.filter(e=>e.k==='acc').forEach(e=>{hours[e.h]=(hours[e.h]||0)+1});
+  const topH=Object.entries(hours).sort((a,b)=>b[1]-a[1])[0];
+  const pmax=Math.max(1,...days.map(x=>x?pd(x).length:0));
+  const bmax=Math.max(1,...days.map(x=>x?(S.bites[x]||0):0));
+  const nmax=Math.max(1,...days.map(x=>x?(S.nights[x]||0):0));
+  const lbl=days.map(x=>`<span>${x?('D'+x):''}</span>`).join('');
+  const bweek=days.filter(Boolean).map(x=>S.bites[x]||0),bfirst=bweek.slice(0,3).reduce((a,b)=>a+b,0),blast=bweek.slice(-3).reduce((a,b)=>a+b,0);
+  return `<div class="stack-lg">${header()}
+  <div class="card stack"><div class="row" style="justify-content:space-between"><h2>Potty</h2><span class="muted small">Day ${d}</span></div>
+    <div class="stats"><div class="stat"><div class="lbl">Outside</div><div class="big">${wins}</div></div><div class="stat"><div class="lbl">Accidents</div><div class="big">${acc}</div></div><div class="stat"><div class="lbl">Success</div><div class="big">${today.length?Math.round(wins/today.length*100)+'%':'–'}</div></div></div>
+    <div class="row"><button class="btn btn-primary" data-potty="win" style="flex:1">Went outside</button><button class="btn btn-warn" data-potty="acc" style="flex:1">Accident</button></div>
+    <div class="week" aria-label="Potty trips over the last 7 days">${days.map(x=>`<div class="col">${x?bars([pd(x).filter(e=>e.k==='acc').length],pmax,'w')+bars([pd(x).filter(e=>e.k==='win').length],pmax,'g'):''}</div>`).join('')}</div>
+    <div class="week-l">${lbl}</div><div class="legend"><span><b style="background:var(--accent)"></b>Outside</span><span><b style="background:var(--warn)"></b>Accidents</span></div>
+    ${topH?`<p class="small">Most accidents happen around <b>${String(topH[0]).padStart(2,'0')}:00</b>. Plan a trip shortly before then.</p>`:'<p class="small muted">Log a few trips and the most common accident time shows up here.</p>'}
+  </div>
+  <div class="card stack"><h2>Biting</h2>
+    <div class="stepper"><button class="btn" data-bite="-1" aria-label="One fewer biting episode">−</button><div><div class="big">${S.bites[d]||0}</div><div class="small muted">biting episodes today</div></div><button class="btn" data-bite="1" aria-label="One more biting episode">+</button></div>
+    <div class="week" aria-label="Biting episodes over the last 7 days">${days.map(x=>`<div class="col">${x?bars([S.bites[x]||0],bmax,'w'):''}</div>`).join('')}</div><div class="week-l">${lbl}</div>
+    ${bweek.length>=6?`<p class="small">${blast<bfirst?'Biting is going down compared with earlier this week.':blast>bfirst?'Biting went up this week. Add more naps; overtired puppies bite more.':'Biting is steady this week.'}</p>`:''}
+  </div>
+  <div class="card stack"><h2>Crate and nights</h2>
+    <div class="stepper"><button class="btn" data-night="-1" aria-label="One fewer wake-up">−</button><div><div class="big">${S.nights[d]||0}</div><div class="small muted">night wake-ups</div></div><button class="btn" data-night="1" aria-label="One more wake-up">+</button></div>
+    <label class="f">Calm crate time today, in minutes<input id="crate" type="number" min="0" max="600" value="${esc(S.crate[d]||'')}" placeholder="0"></label>
+    <div class="week" aria-label="Night wake-ups over the last 7 days">${days.map(x=>`<div class="col">${x?bars([S.nights[x]||0],nmax,'w'):''}</div>`).join('')}</div><div class="week-l">${lbl}</div>
+  </div></div>`;
+}
+function caption(){const p=P(),d=day(),s=streak();return `${p.name} is on Day ${d} of ${pron()[2]} first 90 days at home.${s>1?' '+s+'-day streak.':''} #MyPuppy`}
+function photoFig(k,label){return `<figure>${PH[k]?`<img src="${PH[k]}" alt="${label} photo">`:`<div class="ph-empty">${label} photo</div>`}<figcaption>${label}</figcaption></figure>`}
+function viewProgress(){
+  const d=day(),pv=isPreview(),due=checkinDue(),p=P(),n=esc(p.name),dc=pv?d:doneCount();
+  const cells=Array.from({length:90},(_,i)=>{const k=i+1;let c='';if(k<S.cur)c='full';else if(k===S.cur){const r=dayDone(k);c=r.n===r.total?'full':r.n?'part':''}return `<span class="${c} ${k===d?'today':''}" title="Day ${k}"></span>`}).join('');
+  const ms=[[1,'First day home'],[7,'One week of routine'],[30,'One month'],[45,'Halfway'],[60,'Two months'],[75,'Final stretch begins'],[90,'Graduation']];
+  const q=[['biting','Biting'],['potty','Potty accidents'],['crying','Night crying']];
+  const ci=due&&!pv?`<div class="card stack" id="checkin"><h2>Week ${due} check-in</h2><p class="muted small">Compared with last week, how is ${n} doing?</p>
+    ${q.map(([k,l])=>`<div class="stack" style="gap:6px"><span class="small" style="font-weight:600">${l}</span><div class="opts">${[['better','Better'],['same','Same'],['worse','Worse']].map(([v,t])=>`<button class="chip" data-ci="${k}" data-v="${v}" aria-pressed="${ciDraft[k]===v}">${t}</button>`).join('')}</div></div>`).join('')}
+    <button class="btn btn-primary" id="saveci" ${Object.keys(ciDraft).length<3?'disabled':''}>Save check-in</button></div>`:'';
+  const hist=Object.entries(S.checkins).map(([w,c])=>`<p class="small">Week ${w}: ${c.focus?'next week adds extra focus on '+CONCERNS[c.focus][0].toLowerCase()+'.':'all better.'}</p>`).join('');
+  const all=S.potty.length,wins=S.potty.filter(e=>e.k==='win').length;
+  const grad=doneCount()>=90||d===90;
+  const cert=grad?`<div class="stack"><div class="cert"><p class="eyebrow">Certificate of graduation</p><h2>${n}</h2>
+    <p>completed the MyPuppy 90-day plan${p.owner?' with '+esc(p.owner):''}</p>
+    <div class="cert-ph">${photoFig(1,'Day 1')}${photoFig(90,'Day 90')}</div>
+    <p class="small muted">${doneCount()>=90?esc(S.doneOn[90]||todayISO()):'Preview. The date appears on graduation day.'}</p></div>
+    <p class="small muted">Screenshot the certificate to save or share it.</p></div>`:'';
+  return `<div class="stack-lg">${header()}${ci}${cert}
+  <div class="stats"><div class="stat"><div class="lbl">Streak</div><div class="big">${streak()}</div><div class="small muted">days</div></div><div class="stat"><div class="lbl">Days complete</div><div class="big">${doneCount()}</div><div class="small muted">of 90</div></div><div class="stat"><div class="lbl">Days left</div><div class="big">${90-doneCount()}</div><div class="small muted">to graduation</div></div></div>
+  <div class="card stack"><h2>${n}'s 90 days</h2><div class="grid90" aria-label="One square per day">${cells}</div>
+  <div class="legend"><span><b style="background:var(--accent)"></b>Complete</span><span><b style="background:var(--accent-soft);box-shadow:inset 0 0 0 1px var(--accent)"></b>In progress</span><span><b style="background:var(--line)"></b>Not yet</span></div></div>
+  <div class="stack"><h2>Share ${n}'s progress</h2>
+  <div class="sharecard" id="sharecard"><div class="sc-top"><span>MyPuppy</span><span>Day ${d} of 90</span></div>
+    ${PH[1]?`<img src="${PH[1]}" alt="${n}">`:''}
+    <div><div class="sc-name">${n}</div><div>${dc} ${dc===1?'day':'days'} into ${pron()[2]} first 90 days at home</div></div>
+    <div class="sc-stats"><div><b>${streak()}</b><span>day streak</span></div><div><b>${all?Math.round(wins/all*100)+'%':'–'}</b><span>potty success</span></div><div><b>${90-dc}</b><span>days to go</span></div></div></div>
+  <div class="row"><button class="btn" id="copycap">Copy caption</button><span class="small muted">Screenshot the card to share it.</span></div></div>
+  <div class="card stack"><h2>Photos</h2>
+    <div class="row">${PH[1]?`<img class="thumb" src="${PH[1]}" alt="Day 1 photo">`:''}<label class="f" style="flex:1;min-width:0">Day 1 photo<input id="ph-1" type="file" accept="image/*"></label></div>
+    <div class="row">${PH[90]?`<img class="thumb" src="${PH[90]}" alt="Day 90 photo">`:''}<label class="f" style="flex:1;min-width:0">Day 90 photo<input id="ph-90" type="file" accept="image/*"></label></div>
+    <p class="small muted">Both photos appear side by side on the graduation certificate.</p></div>
+  <div class="card stack"><h2>Milestones</h2><div class="ms">${ms.map(([k,l])=>`<span class="d">Day ${k}</span><span class="${S.cur>=k?'hit':''}">${l}${S.cur>=k?' · reached':''}</span>`).join('')}</div></div>
+  ${hist?`<div class="card stack"><h2>Check-ins</h2>${hist}</div>`:''}
+  ${p.story?`<div class="card stack"><h3>How ${n} came home</h3><p class="small muted">${esc(p.story)}</p></div>`:''}
+  </div>`;
+}
+function viewHelp(){
+  const p=P(),n=esc(p.name);
+  return `<div class="stack-lg">${header()}
+  <div class="warnnote stack"><h3>Call your vet if ${n}</h3><ul class="clean small"><li>has vomiting or diarrhoea for more than a day, or any blood</li><li>stops eating or drinking, or seems very tired</li><li>has trouble breathing, or ate something possibly toxic</li><li>suddenly has many more accidents, or strains to pee</li></ul></div>
+  <div class="card stack"><h3>See a certified trainer or vet behaviourist if</h3><ul class="clean small"><li>${n} growls, snaps or bites hard to guard food or toys</li><li>fear or panic does not ease after a few weeks</li><li>${n} panics, howls or hurts ${pron()[3]} when left alone</li></ul>
+  <p class="small muted">MyPuppy uses reward-based training. It does not replace your vet. Ask your vet when ${n} can safely walk in public and meet unfamiliar dogs before vaccinations are complete.</p></div>
+  <div class="card stack"><h3>Your puppy</h3><p class="small">${n}${p.breed?', '+esc(p.breed):''}${p.gender?', '+esc(p.gender):''}, ${esc(p.size)} size. Started at ${esc(p.age)} weeks old on ${esc(p.start)}. Plan: ${S.unlocked?'full 90 days':'free preview'}.</p></div>
+  <div class="card"><h3 style="margin-bottom:8px">Terms, refunds and privacy</h3>
+    <details class="legal"><summary>Terms of use</summary><p>MyPuppy gives general, reward-based puppy training guidance. It is not veterinary or behavioural advice and does not replace a vet or a certified trainer. Every puppy is different, so we do not guarantee specific results. You are responsible for your puppy's safety during training. One purchase covers one household.</p></details>
+    <details class="legal"><summary>Refund policy</summary><p>If MyPuppy is not right for you, ask for a refund within 7 days of purchase and we will refund you in full. Contact: noumanibad@gmail.com.</p></details>
+    <details class="legal"><summary>Privacy</summary><p>We store what you enter: your first name, your puppy's details and story, photos you add, and your tracking logs. We use this only to run your plan. We do not sell it. You can delete everything from Help, under Start over. To delete your account, email noumanibad@gmail.com. Your data is stored with our database provider, Supabase.</p></details></div>
+  ${cloud&&user?`<div class="card stack"><h3>Your account</h3><p class="small">Signed in as ${esc(user.email)}. Your progress is saved to your account.</p><div class="row"><button class="btn" id="signout">Sign out</button>${S.unlocked?'':'<button class="btn" id="refresh-access">I\'ve paid. Unlock my plan</button>'}</div></div>`:''}
+  ${cloud?'':`<div class="card stack"><h3>Testing tools</h3><p class="small muted">For trying the app before launch. These are removed in the live version.</p>
+    <div class="row"><input id="pv" type="range" min="1" max="90" value="${day()}" style="flex:1;accent-color:var(--accent)" aria-label="Preview day"><span class="daypill" id="pvl">Day ${day()}</span></div>
+    <button class="btn" id="t-next">Finish today and jump to tomorrow</button>
+    <button class="btn" id="t-away">Simulate 3 days away</button>
+    ${S.unlocked?'<button class="btn" id="t-lock">Lock the plan again</button>':''}</div>`}
+  <div class="card stack"><h3>Start over</h3>${confirmReset?`<p class="small">This deletes ${n}'s plan, photos and all tracking. Your account stays.</p><div class="row"><button class="btn btn-warn" id="reset2">Delete everything</button><button class="btn" id="reset0">Keep it</button></div>`:`<button class="btn btn-warn" id="reset1">Reset MyPuppy</button>`}</div>
+  </div>`;
+}
+let ciDraft={};
+
+function render(){
+  if(!P()||(cloud&&!user)||authMode==='newpass'){renderOb();return}
+  advance();
+  $('#tabs').hidden=false;
+  document.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-current',b.dataset.tab===tab?'page':'false'));
+  $('#app').innerHTML={today:viewToday,track:viewTrack,progress:viewProgress,help:viewHelp}[tab]();
+}
+
+/* ---------- events ---------- */
+document.addEventListener('click',e=>{
+  const t=e.target.closest('button');if(!t)return;
+  if(t.dataset.go!==undefined){grabOb();const n=+t.dataset.go;
+    if(ob.step===1&&n===2&&!(ob.data.name||'').trim()){toast('Add your puppy\'s name to continue');return}
+    if(ob.step===1&&n===2&&!ob.data.gender){toast('Choose your puppy\'s gender to continue');return}
+    if(ob.step===3&&n===4&&(ob.data.story||'').trim().length<20){toast('Add a few lines about how your puppy came home');return}
+    ob.step=n;renderOb();window.scrollTo(0,0);return}
+  if(t.id==='finish'){grabOb();finishOb();return}
+  if(t.id==='go-signin'){authMode='signin';authNote='';renderOb();return}
+  if(t.id==='back-welcome'){authMode=null;renderOb();return}
+  if(t.id==='signup'){grabOb();const em=val('a-email'),pw=(document.getElementById('a-pass')||{}).value||'';
+    if(!validEmail(em)){toast('Enter a valid email address');return}
+    if(pw.length<8){toast('Use a password of at least 8 characters');return}
+    t.disabled=true;
+    cloud.auth.signUp({email:em,password:pw}).then(({data,error})=>{
+      if(error){t.disabled=false;toast(error.message);return}
+      if(data.session){user=data.user;authMode=null;finishOb();refreshAccess(true)}
+      else{authMode='signin';authNote='Check your email to confirm your account, then sign in here.';finishOb(true)}
+    },()=>{t.disabled=false;toast('Could not reach the server. Try again.')});return}
+  if(t.id==='signin'){const em=val('a-email'),pw=(document.getElementById('a-pass')||{}).value||'';
+    if(!validEmail(em)||!pw){toast('Enter your email and password');return}
+    t.disabled=true;
+    cloud.auth.signInWithPassword({email:em,password:pw}).then(async({data,error})=>{
+      if(error){t.disabled=false;toast(error.message);return}
+      user=data.user;authMode=null;authNote='';await pullCloud();checkAway();tab='today';render();
+    },()=>{t.disabled=false;toast('Could not reach the server. Try again.')});return}
+  if(t.id==='forgot'){const em=val('a-email');if(!validEmail(em)){toast('Enter your email first');return}
+    cloud.auth.resetPasswordForEmail(em,{redirectTo:location.origin+location.pathname}).then(()=>toast('If that email has an account, a reset link is on its way.'));return}
+  if(t.id==='setpass'){const pw=(document.getElementById('a-pass')||{}).value||'';if(pw.length<8){toast('Use a password of at least 8 characters');return}
+    cloud.auth.updateUser({password:pw}).then(async({data,error})=>{if(error){toast(error.message);return}user=data.user;authMode=null;await pullCloud();render();toast('Password saved')});return}
+  if(t.id==='signout'){cloud.auth.signOut().then(()=>{user=null;S=blank();PH={};mem=S;pmem=PH;try{localStorage.removeItem(KEY);localStorage.removeItem(PKEY)}catch(e){}ob={step:0,data:{concerns:[]},photo:null};authMode=null;tab='today';render()});return}
+  if(t.id==='refresh-access'){t.disabled=true;refreshAccess(false);return}
+  if(t.dataset.c){const c=ob.data.concerns,k=t.dataset.c,i=c.indexOf(k);i<0?c.push(k):c.splice(i,1);t.setAttribute('aria-pressed',i<0);return}
+  if(t.dataset.tab){tab=t.dataset.tab;confirmReset=false;render();window.scrollTo(0,0);return}
+  if(t.dataset.tabgo){tab=t.dataset.tabgo;render();window.scrollTo(0,0);return}
+  if(t.dataset.potty){const now=new Date();S.potty.push({d:day(),h:now.getHours(),k:t.dataset.potty});touch();persist();render();toast(t.dataset.potty==='win'?'Logged a trip outside':'Logged an accident');return}
+  if(t.dataset.bite){const d=day();S.bites[d]=Math.max(0,(S.bites[d]||0)+ +t.dataset.bite);touch();persist();render();return}
+  if(t.dataset.night){const d=day();S.nights[d]=Math.max(0,(S.nights[d]||0)+ +t.dataset.night);touch();persist();render();return}
+  if(t.dataset.ci){ciDraft[t.dataset.ci]=t.dataset.v;render();return}
+  if(t.id==='saveci'){const w=checkinDue();if(!w)return;const order=['biting','potty','crying'];const focus=order.find(k=>ciDraft[k]==='worse')||order.find(k=>ciDraft[k]==='same')||null;S.checkins[w]={...ciDraft,focus};ciDraft={};persist();render();toast(focus?'Saved. Next week adds focus on '+CONCERNS[focus][0].toLowerCase():'Saved. Great week');return}
+  if(t.id==='seeplans'){showPlans=true;render();return}
+  if(t.id==='unlock'){if(cloud)return;S.unlocked=true;persist();render();toast('Full plan unlocked for testing');return}
+  if(t.id==='savelead'){const el=document.getElementById('lead'),v=(el?el.value:'').trim();if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)){toast('Enter a valid email address');return}S.lead=v;persist();toast('Saved on this device. The prototype does not send email.');return}
+  if(t.id==='copycap'){const c=caption();const done=()=>toast('Caption copied');const fail=()=>toast(c);try{navigator.clipboard.writeText(c).then(done,fail)}catch(err){fail()}return}
+  if(t.id==='endpreview'){S.previewDay=null;persist();render();return}
+  if(t.id==='t-next'){const c=S.cur;S.previewDay=null;S.done[c]={};tasksFor(c).forEach(x=>S.done[c][x.id]=true);if(!S.doneOn[c])S.doneOn[c]=todayISO();shiftBack(1);touch();advance();persist();tab='today';render();window.scrollTo(0,0);toast(locked()?'Day 3 is done. The free preview ends here.':S.cur===c?'Day 90 is complete':'Now on Day '+S.cur);return}
+  if(t.id==='t-away'){if(!S.last)S.last=todayISO();S.previewDay=null;shiftBack(3);checkAway();persist();tab='today';render();window.scrollTo(0,0);return}
+  if(t.id==='t-lock'){S.unlocked=false;persist();render();toast('Plan locked again');return}
+  if(t.id==='reset1'){confirmReset=true;render();return}
+  if(t.id==='reset0'){confirmReset=false;render();return}
+  if(t.id==='reset2'){S=blank();PH={};savePhotos();persist();confirmReset=false;ob={step:0,data:{concerns:[]},photo:null};tab='today';render();return}
+});
+document.addEventListener('change',e=>{
+  const t=e.target;
+  if(t.dataset.task){if(isPreview())return;const d=S.cur;S.done[d]=S.done[d]||{};S.done[d][t.dataset.task]=t.checked;
+    const c=complete(d);if(c&&!S.doneOn[d])S.doneOn[d]=todayISO();if(!c)delete S.doneOn[d];
+    touch();persist();render();if(t.checked&&c)toast(locked()?'Day 3 is done. That completes the free preview.':'All of today\'s tasks done. Nice work.');return}
+  if(t.id==='crate'){S.crate[day()]=Math.max(0,+t.value||0);touch();persist();return}
+  if(t.id==='pv'){const v=+t.value;S.previewDay=v===S.cur?null:v;persist();render();return}
+  if(t.id==='f-photo'){readPhoto(t.files[0],u=>{ob.photo=u;renderOb()});return}
+  if(t.id==='ph-1'||t.id==='ph-90'){const k=t.id==='ph-1'?1:90;readPhoto(t.files[0],u=>{PH[k]=u;const ok=savePhotos();render();toast(ok?'Photo added':'Photo added for now. It is too large to keep on this device.')});return}
+});
+document.addEventListener('input',e=>{if(e.target.id==='pv'){const l=document.getElementById('pvl');if(l)l.textContent='Day '+e.target.value}});
+async function boot(){
+  if(cloud){
+    try{
+      cloud.auth.onAuthStateChange(ev=>{if(ev==='PASSWORD_RECOVERY'){authMode='newpass';render()}});
+      const {data}=await cloud.auth.getSession();
+      if(data&&data.session){user=data.session.user;await pullCloud()}
+      else if(S.profile&&!S.pendingSignup){S=blank();PH={}}
+      else if(S.pendingSignup){authMode='signin'}
+    }catch(e){console.error(e)}
+    window.addEventListener('focus',()=>{if(user&&P()&&!S.unlocked)refreshAccess(true)});
+    document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&pushT)flushCloud()});
+  }
+  checkAway();persist();render();
+}
+boot();
+})();
+</script>
+</body>
+</html>
