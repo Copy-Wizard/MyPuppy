@@ -18,6 +18,7 @@ async function mk(scheme,cloud){
   p.on('console',m=>{if(m.type()==='error'&&!/ERR_|Failed to load/.test(m.text()))errs.push('console: '+m.text())});p.on('pageerror',e=>errs.push('PAGEERR '+e.message));
   await p.route('**/supabase.js',r=>cloud?r.fulfill({contentType:'text/javascript',body:MOCK}):r.abort());
   await p.route('**/fonts.googleapis.com/**',r=>r.abort());
+  if(!cloud)await p.route('**/config.js',r=>r.fulfill({contentType:'text/javascript',body:'window.MYPUPPY_CONFIG={}'}));
   if(cloud)await p.route('**/config.js',r=>r.fulfill({contentType:'text/javascript',body:'window.MYPUPPY_CONFIG={supabaseUrl:"https://x.supabase.co",supabaseAnonKey:"k",gumroad:{pass:"https://x.gumroad.com/l/mypuppy",lifetime:"",monthly:""}}'}));
   return p;
 }

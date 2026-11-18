@@ -175,6 +175,8 @@ html = f"""<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex">
+<link rel="icon" href="../assets/icon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#1C6B5E">
 {title_and_fonts.strip()}
 <style>
 body{{margin:0}}img{{max-width:100%}}[hidden]{{display:none!important}}

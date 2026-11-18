@@ -5,6 +5,18 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>MyPuppy: your puppy's first 90 days, one day at a time</title>
 <meta name="description" content="A simple daily plan for your puppy's first 90 days at home. Short reward-based tasks, potty and biting trackers, and a coach message every day. First 3 days free.">
+<link rel="canonical" href="https://trymypuppy.com/">
+<link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="MyPuppy">
+<meta property="og:url" content="https://trymypuppy.com/">
+<meta property="og:title" content="MyPuppy: your puppy's first 90 days, one day at a time">
+<meta property="og:description" content="A short daily plan built for your puppy's age and problems. Biting, potty accidents, crying at night. First 3 days free.">
+<meta property="og:image" content="https://trymypuppy.com/assets/gumroad-cover.png">
+<meta property="og:image:width" content="1280">
+<meta property="og:image:height" content="720">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#1C6B5E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Inter:wght@400;500;600&display=swap">
 <style>
@@ -65,6 +77,7 @@ ul.ticks{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:r
 ul.ticks li{padding-left:28px;position:relative}
 ul.ticks li::before{content:"";position:absolute;left:0;top:.45em;width:14px;height:8px;border-left:2.5px solid var(--accent);border-bottom:2.5px solid var(--accent);transform:rotate(-45deg)}
 .prices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;align-items:stretch}
+.prices.one{grid-template-columns:minmax(0,420px)}
 .price{font:800 40px var(--font-display);font-variant-numeric:tabular-nums}
 .price small{font:500 15px var(--font-body);color:var(--muted)}
 .card.main{border:2px solid var(--accent)}
@@ -150,11 +163,9 @@ footer a{color:inherit}
 
 <section id="pricing"><div class="in stack">
   <div class="stack narrow"><h2>Start free. Pay only if it helps.</h2>
-  <p class="muted">The first 3 days are free. If you want to keep going, choose a plan. Every paid plan has a 7-day refund.</p></div>
-  <div class="prices">
-    <div class="card main"><span class="tag">Best for one puppy</span><h3>90-Day Pass</h3><div class="price">$29 <small>once</small></div><p class="muted">The full 90-day plan, all trackers and the graduation certificate.</p></div>
-    <div class="card"><h3>Monthly</h3><div class="price">$9.99 <small>a month</small></div><p class="muted">Pay month by month and cancel any time.</p></div>
-    <div class="card"><h3>Lifetime</h3><div class="price">$59 <small>once</small></div><p class="muted">The full plan plus future modules as they are added.</p></div>
+  <p class="muted">The first 3 days are free. If you want to keep going, unlock the full plan with one payment. No subscription, and a 7-day refund.</p></div>
+  <div class="prices one">
+    <div class="card main"><h3>90-Day Pass</h3><div class="price">$29 <small>once</small></div><p class="muted">The full 90-day plan, all trackers, weekly check-ins and the graduation certificate.</p></div>
   </div>
   <div><a class="btn" href="app/">Start free for 3 days</a></div>
 </div></section>
